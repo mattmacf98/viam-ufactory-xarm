@@ -416,8 +416,8 @@ func (x *xArm) start(ctx context.Context, direct bool) error {
 
 // Close shuts down the arm servos and engages brakes.
 func (x *xArm) Close(ctx context.Context) error {
-	x.closed.Store(true)
 	if x.conn == nil {
+		x.closed.Store(true)
 		return nil
 	}
 
@@ -433,6 +433,7 @@ func (x *xArm) Close(ctx context.Context) error {
 	}
 
 	x.conn = nil
+	x.closed.Store(true)
 
 	return err
 }
