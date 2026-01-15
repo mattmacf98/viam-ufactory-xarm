@@ -421,23 +421,20 @@ func (x *xArm) Close(ctx context.Context) error {
 		return nil
 	}
 
-	if err := x.toggleBrake(ctx, false); err != nil {
-		return err
-	}
-	if err := x.toggleServos(ctx, false); err != nil {
-		return err
-	}
-	if err := x.setMotionState(ctx, 4); err != nil {
-		return err
+	err := multierr.Combine(
+		x.toggleBrake(ctx, false),
+		x.toggleServos(ctx, false),
+		x.setMotionState(ctx, 4),
+		x.conn.Close(),
+	)
+
+	if err != nil {
+		x.logger.Warnf("closing connection failed: %v", err)
 	}
 
-	err := x.conn.Close()
-	if err != nil {
-		return err
-	}
 	x.conn = nil
 
-	return nil
+	return err
 }
 
 func (x *xArm) MoveThroughJointPositions(
